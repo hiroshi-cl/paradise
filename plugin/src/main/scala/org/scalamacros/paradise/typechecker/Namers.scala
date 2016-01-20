@@ -476,7 +476,11 @@ trait Namers {
       }
       // def isAccessible(cx: Context, sym: Symbol) = if (canDefineMann(cx.owner)) cx.isAccessible(sym, cx.prefix, superAccess = false) else false
       def isAccessible(cx: Context, sym: Symbol) = true // TODO: sorry, it's 2am, and I can't figure this out
-      def member(tpe: Type, name: Name) = if (canDefineMann(tpe.typeSymbol)) tpe.member(name) else NoSymbol
+      def member(tpe: Type, name: Name) = if (canDefineMann(tpe.typeSymbol)) try {
+          tpe.member(name)
+        } catch {
+          case e: scala.reflect.internal.Symbols#CyclicReference => NoSymbol
+        } else NoSymbol
       def nonLocalMember(tpe: Type, name: Name) = if (canDefineMann(tpe.typeSymbol)) tpe.nonLocalMember(name) else NoSymbol
 
       if (tpt.hasSymbolField && tpt.symbol != NoSymbol) tpt.symbol
